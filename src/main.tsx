@@ -13,7 +13,7 @@ const css = (t, ...args) => String.raw(t, ...args);
 const pluginId = PL.id;
 
 function main() {
-  console.info(`#${pluginId}: MAIN`);
+  console.info(`#${pluginId}: loaded Main`);
   const root = ReactDOM.createRoot(document.getElementById("app")!);
 
   root.render(
