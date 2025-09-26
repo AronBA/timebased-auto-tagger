@@ -1,4 +1,4 @@
-import React, {useRef} from "react";
+import React, {useEffect, useRef} from "react";
 import {getCurrentTag, useAppVisible} from "./utils";
 import {EntityID} from "@logseq/libs/dist/LSPlugin";
 
@@ -13,12 +13,10 @@ async function initKnownPages() {
 }
 
 async function createTag(id: EntityID) {
-
     const page = await logseq.Editor.getPage(id);
-
     if (page) {
+        if (page["journal?"]) return;
         const blocks = await logseq.Editor.getPageBlocksTree(page.name);
-
         if (blocks.length > 0) {
             await logseq.Editor.insertBlock(blocks[0].uuid, await getCurrentTag(), {
                 before: true,
@@ -29,7 +27,6 @@ async function createTag(id: EntityID) {
         }
         await logseq.Editor.exitEditingMode();
     }
-    return;
 }
 
 function registerPageWatcher() {
@@ -53,30 +50,29 @@ function App() {
     const innerRef = useRef<HTMLDivElement>(null);
     const visible = useAppVisible();
 
-    initKnownPages();
-    registerPageWatcher();
+    useEffect(() => {
+        initKnownPages();
+        registerPageWatcher();
+    }, []);
 
-    if (visible) {
-        return (
-            <main
-                className="backdrop-filter backdrop-blur-md fixed inset-0 flex items-center justify-center"
-                onClick={(e) => {
-                    if (!innerRef.current?.contains(e.target as any)) {
-                        window.logseq.hideMainUI();
-                    }
-                }}
-            >
-                <div ref={innerRef} className="text-size-2em">
-                    <form>
-                        <input type="text"></input>
-                    </form>
-                </div>
-            </main>
-        );
-    }
+    if (!visible) return null;
 
-
-    return null;
+    return (
+        <main
+            className="backdrop-filter backdrop-blur-md fixed inset-0 flex items-center justify-center"
+            onClick={(e) => {
+                if (!innerRef.current?.contains(e.target as any)) {
+                    window.logseq.hideMainUI();
+                }
+            }}
+        >
+            <div ref={innerRef} className="text-size-2em">
+                <form>
+                    <input type="text"></input>
+                </form>
+            </div>
+        </main>
+    );
 }
 
 export default App;

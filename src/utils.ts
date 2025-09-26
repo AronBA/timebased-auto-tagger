@@ -9,6 +9,7 @@ export interface Event {
     name: string;
     start: Date;
     end: Date;
+    rtype: any;
 }
 
 const url = "https://calendar.proton.me/api/calendar/v1/url/Dn6nkYyqSDiCH2dmLKxlI1LxWCFkKQdTpKXqIihxKxptftZUeujWsQa3WuKeyInqAstHMhQk5ZXhMbNLt5sJLA==/calendar.ics?CacheKey=BmN2O2IsZffP5zdIAo8GTw%3D%3D&PassphraseKey=BMQIX6vPL_EKA-Eaxquy2cWRrb8lvGO-KNBnZnq-qFk%3D";
@@ -51,26 +52,45 @@ async function getSchedule() {
             name: event.summary,
             start: event.startDate.toJSDate(),
             end: event.endDate.toJSDate(),
+            rtype: event?.getRecurrenceTypes(),
+
 
         }
-        console.log(evenD)
         return evenD;
     });
 }
 
 
+function isEventToday(event: Event): boolean {
+    const now = new Date();
+    if ("DAILY" in event.rtype) {
+        return true;
+    }
+    else if ("WEEKLY" in event.rtype) {
+        return event.start.getDay() === now.getDay() || event.end.getDay() === now.getDay()
+    }
+    else if ("MONTHLY" in event.rtype) {
+        return event.start.getDate() === now.getDate() || event.end.getDate() === now.getDate()
+    }
+     else {
+        return now >= event.start && now <= event.end;
+    }
+}
+
 export async function getCurrentTag(): Promise<string> {
     let events = await getSchedule()
-
     const now = new Date();
 
-    events = events.filter(event => {
-        return now >= event.start && now <= event.end;
+    events = events
+        .filter(event => {
+        return isEventToday(event)
+            && event.start.getHours() <= now.getHours()
+            && event.end.getHours() >= now.getHours()
     });
 
     let string = "Tags: ";
     for (const event of events) {
-        string = string + "#" +event.name.replace(/ /g, "_");
+        string = string + "#" + event.name.replace(/ /g, "_");
     }
     return string;
 }
