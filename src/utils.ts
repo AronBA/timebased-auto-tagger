@@ -12,7 +12,6 @@ export interface Event {
     rtype: any;
 }
 
-const url = "https://calendar.proton.me/api/calendar/v1/url/Dn6nkYyqSDiCH2dmLKxlI1LxWCFkKQdTpKXqIihxKxptftZUeujWsQa3WuKeyInqAstHMhQk5ZXhMbNLt5sJLA==/calendar.ics?CacheKey=BmN2O2IsZffP5zdIAo8GTw%3D%3D&PassphraseKey=BMQIX6vPL_EKA-Eaxquy2cWRrb8lvGO-KNBnZnq-qFk%3D";
 
 function subscribeLogseqEvent<T extends LSPluginUserEvents>(
     eventName: T,
@@ -35,6 +34,8 @@ export const useAppVisible = () => {
 };
 
 async function getSchedule() {
+    const url :string = await logseq.settings?.url as string;
+    console.log(`Fetching iCal from URL: ${url}`);
     const res = await fetch(url);
     if (!res.ok) {
         throw new Error(res.statusText);

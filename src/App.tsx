@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from "react";
+import React, {useEffect} from "react";
 import {getCurrentTag, useAppVisible} from "./utils";
 import {EntityID} from "@logseq/libs/dist/LSPlugin";
 
@@ -9,9 +9,7 @@ async function initKnownPages() {
     if (pages && pages.length > 0) {
         knownPages = pages.map((p: any) => p.id);
     }
-    console.log("Initial pages loaded:", knownPages.length);
 }
-
 async function createTag(id: EntityID) {
     const page = await logseq.Editor.getPage(id);
     if (page) {
@@ -47,7 +45,16 @@ function registerPageWatcher() {
 }
 
 function App() {
-    const innerRef = useRef<HTMLDivElement>(null);
+    logseq.useSettingsSchema([
+        {
+            key:"url",
+            title:"iCal URL",
+            description:"The URL of the iCal feed to fetch events from.",
+            type:"string",
+            default:"https://example.com/calendar.ics"
+        }
+
+    ]);
     const visible = useAppVisible();
 
     useEffect(() => {
@@ -57,22 +64,7 @@ function App() {
 
     if (!visible) return null;
 
-    return (
-        <main
-            className="backdrop-filter backdrop-blur-md fixed inset-0 flex items-center justify-center"
-            onClick={(e) => {
-                if (!innerRef.current?.contains(e.target as any)) {
-                    window.logseq.hideMainUI();
-                }
-            }}
-        >
-            <div ref={innerRef} className="text-size-2em">
-                <form>
-                    <input type="text"></input>
-                </form>
-            </div>
-        </main>
-    );
+    return (<main></main>)
 }
 
 export default App;
